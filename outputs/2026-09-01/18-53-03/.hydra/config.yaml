@@ -1,0 +1,6 @@
+boundaries:
+  min_interval: 2400
+  max_single_dose: 2.5
+  max_total_dose: 10.0
+  max_n_doses: 20
+  n_doses: 5

@@ -7,7 +7,12 @@ authors = [
     { name = "TreeCapitator", email = "igor.misterowicz@gmail.com" }
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "hydra-core",
+    "mypy>=2.3.1",
+    "pandas>=2.3.3",
+    "ruff>=0.16.5",
+]
 
 [project.scripts]
 surmodelsopt = "surmodelsopt:main"
