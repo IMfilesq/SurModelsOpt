@@ -1,9 +1,10 @@
-import hydra
 import logging
+
+import hydra
 import pandas as pd
 from omegaconf import DictConfig
-from src.data.loader import load_raw_data
 
+from src.data.loader import load_raw_data
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
