@@ -9,7 +9,6 @@ import pandas as pd
 import pytorch_lightning as pl
 import torch
 
-#from black import out
 from torch.utils.data import DataLoader
 
 from src.models.architectures.aw_best.datasets import Dataset, DatasetMargin
@@ -352,9 +351,14 @@ class CancerNet(pl.LightningModule):
         self.log_dict(metric)
         return loss
 
-    def validation_epoch_end(self, val_step_outputs):
-        """validation epoch end  (see pythorch-lightning
-        documenation for more information)
+    def on_validation_epoch_end(self):
+        """validation epoch end (see pytorch-lightning
+        documentation for more information).
+
+        Renamed from `validation_epoch_end` -- PyTorch Lightning 2.x
+        removed the `outputs` argument and this hook name; logic is
+        unchanged since results were already accumulated manually in
+        self.val_loss / self.val_mae / etc.
         """
         lr = self.optimizers().param_groups[0]["lr"]
         self.logger.experiment.add_scalar("lr", lr, self.current_epoch)
@@ -440,9 +444,12 @@ class CancerNet(pl.LightningModule):
         self.log_dict(metric)
         return loss
 
-    def test_epoch_end(self, test_step_outputs):
-        """test epoch end  (see pythorch-lightning
-        documenation for more information)
+    def on_test_epoch_end(self):
+        """test epoch end (see pytorch-lightning
+        documentation for more information).
+
+        Renamed from `test_epoch_end` -- same reasoning as
+        on_validation_epoch_end above.
         """
         self.logger.experiment.add_scalar(
             "test/epoch_loss", np.mean(np.array(self.test_loss)), self.current_epoch
@@ -475,7 +482,7 @@ class CancerNet(pl.LightningModule):
         schedulers = [
             {
                 "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(
-                    optimizers[0], mode="min", factor=0.7, patience=5, verbose=True
+                    optimizers[0], mode="min", factor=0.7, patience=5
                 ),
                 "monitor": "val_loss",
                 "interval": "epoch",

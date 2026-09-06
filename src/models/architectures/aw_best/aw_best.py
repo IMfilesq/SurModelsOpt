@@ -4,12 +4,14 @@ import torch
 from src.models.architectures.aw_best.experiments_helpers import train_val_test_split
 from src.models.architectures.aw_best.torch_lightning_modules import CancerNet
 from src.models.base_model import BaseModel
+from numpy import typing as npt
 
 
 class AW_Best(BaseModel):
     def __init__(
         self,
-        csv_path: str = "data/data.csv",
+        training_data_path: str = "data/data.csv",
+        ckpt_path: str = "data/models/aw_best.ckpt",
     ):
         sub_config = {
             "n_h": 32,
@@ -29,11 +31,7 @@ class AW_Best(BaseModel):
             "w_losses": [1, 1, 1, 1],
         }
         
-        self.train, self.val, self.test = train_val_test_split(csv_path, "series")
-        self.network = None
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    def load(self, ckpt_path: str) -> None:
+        self.train, self.val, self.test = train_val_test_split(training_data_path, "series")
         self.network = CancerNet.load_from_checkpoint(
             checkpoint_path=ckpt_path,
             train_df=self.train,
@@ -41,9 +39,11 @@ class AW_Best(BaseModel):
             test_df=self.test,
             **self.net_config,
         )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.network.eval().to(self.device)
+        
 
-    def predict(self, raw_protocol):
+    def predict(self, raw_protocol: npt.NDArray[np.float64]) -> float:
         columns = ["time", "dose", "time_gap"]
         scaled = raw_protocol.copy()
         for i, col in enumerate(columns):
@@ -61,40 +61,7 @@ class AW_Best(BaseModel):
             output = self.network.model(batch)
             prediction = output[0, 0, 0].item() * self.network.target_scale
 
-        return np.array([prediction], dtype=np.float64)
+        return np.array([prediction], dtype=np.float64)[0]
 
 
 
-if __name__ == "__main__":
-    model = AW_Best("data/raw.csv")
-    model.load("data/models/aw_best.ckpt")
-    import numpy as np
-
-
-    # Utwórz tablicę o wymiarach (20, 3) - dokładnie 20 kroków czasowych
-    raw_protocol = np.array([
-        [0.0, 2.0, 0.0],
-        [1.0, 2.0, 1.0],
-        [2.0, 0.0, 1.0],
-        [3.0, 2.0, 1.0],
-        [4.0, 2.0, 1.0],
-        [5.0, 0.0, 1.0],
-        [6.0, 2.0, 1.0],
-        [7.0, 2.0, 1.0],
-        [8.0, 0.0, 1.0],
-        [9.0, 2.0, 1.0],
-        [10.0, 2.0, 1.0],
-        [11.0, 0.0, 1.0],
-        [12.0, 2.0, 1.0],
-        [13.0, 2.0, 1.0],
-        [14.0, 0.0, 1.0],
-        [15.0, 2.0, 1.0],
-        [16.0, 2.0, 1.0],
-        [17.0, 0.0, 1.0],
-        [18.0, 2.0, 1.0],
-        [19.0, 2.0, 1.0],
-    ], dtype=np.float32)
-
-    prediction = model.predict(raw_protocol)
-    print("Wynik predykcji:", prediction)
-    print("End!")
