@@ -1,12 +1,15 @@
-boundaries:
-  min_interval : 2400
-  max_single_dose : 2.5
-  max_total_dose : 10.0
-  max_n_doses : 20
-  n_doses : 5
 data:
   data_path : "data/raw.csv"
 model:
   _target_ : src.models.architectures.aw_best.aw_best.AW_Best
   ckpt_path : "data/models/aw_best.ckpt"
   training_data_path : "data/raw.csv"
+optimizer:
+  _target_ : src.optimization.alghoritms.slsqp.SLSQP
+  boundaries:
+    min_interval : 2400
+    max_interval : 7200
+    min_single_dose : 0.0
+    max_single_dose : 2.5
+    max_total_dose : 10.0
+    max_n_doses : 20

@@ -7,6 +7,7 @@ from omegaconf import DictConfig
 
 from src.data.loader import load_raw_data
 from src.models.base_model import BaseModel
+from optimization.base_optimizer import BaseOptimizer
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
@@ -47,6 +48,12 @@ def main(cfg: DictConfig) -> None:
     
     prediction = model.predict(raw_protocol)
     print("Wynik predykcji:", prediction)
+
+    print("instantiating optimizer")
+    optimizer : BaseOptimizer = instantiate(cfg.optimizer,
+                                            model = model)
+    print("minimization result:")
+    print(optimizer.minimize())
 
 
 if __name__ == "__main__":
