@@ -3,7 +3,7 @@ import scipy as sp
 from numpy import typing as npt
 
 from src.models.base_model import BaseModel
-from optimization.base_optimizer import BaseOptimizer
+from src.optimization.base_optimizer import BaseOptimizer
 from src.schemas.boundaries import Boundaries
 
 

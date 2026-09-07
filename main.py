@@ -7,7 +7,7 @@ from omegaconf import DictConfig
 
 from src.data.loader import load_raw_data
 from src.models.base_model import BaseModel
-from optimization.base_optimizer import BaseOptimizer
+from src.optimization.base_optimizer import BaseOptimizer
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
