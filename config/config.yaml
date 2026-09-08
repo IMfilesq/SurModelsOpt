@@ -15,4 +15,4 @@ optimizer:
     max_n_doses : 20
 simulation:
   params_file : "/content/EMT6-Ro/data/default-parameters.json"
-  tumor_file : str = "/content/EMT6-Ro/data/test_tumor.txt"
+  tumor_file : "/content/EMT6-Ro/data/test_tumor.txt"
