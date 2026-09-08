@@ -5,7 +5,7 @@ def simulate(tuple_protocol: list[tuple[float, float]],
              params_file: str = "/content/EMT6-Ro/data/default-parameters.json",
              tumor_file: str = "/content/EMT6-Ro/data/test_tumor.txt") -> float:
     try:
-        import emt6ro.simulation as emt
+        import emt6ro.simulation as emt # type: ignore
 
         if not os.path.exists(params_file) or not os.path.exists(tumor_file):
             raise FileNotFoundError("Brak plików konfiguracyjnych symulatora.")
