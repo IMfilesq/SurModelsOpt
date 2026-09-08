@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 from src.data.loader import load_raw_data
 from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
+from src.simulation.simulation  import simulate
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
@@ -52,8 +53,14 @@ def main(cfg: DictConfig) -> None:
     print("instantiating optimizer")
     optimizer : BaseOptimizer = instantiate(cfg.optimizer,
                                             model = model)
-    print("minimization result:")
-    print(optimizer.minimize())
+    print("launching optimization:")
+    minimum = optimizer.minimize()
+    print("minumum", minimum)
+    print("running simulation")
+    simulated = simulate(tuple_protocol=[(1,1)],
+                         params_file = cfg.simulation.params_file,
+                         tumor_file = cfg.simulation.tumor_file)
+    print("simulated : ", simulated)
 
 
 if __name__ == "__main__":
