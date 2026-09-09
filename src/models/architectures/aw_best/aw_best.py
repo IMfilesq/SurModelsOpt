@@ -4,7 +4,11 @@ import torch
 from src.models.architectures.aw_best.experiments_helpers import train_val_test_split
 from src.models.architectures.aw_best.torch_lightning_modules import CancerNet
 from src.models.base_model import BaseModel
-from numpy import typing as npt
+from src.schemas.protocols import MatrixProtocol
+
+from jaxtyping import jaxtyped
+from beartype import beartype
+
 
 
 class AW_Best(BaseModel):
@@ -42,14 +46,14 @@ class AW_Best(BaseModel):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.network.eval().to(self.device)
         
-
-    def predict(self, raw_protocol: npt.NDArray[np.float64]) -> float:
+    @jaxtyped(typechecker=beartype)
+    def predict(self, protocol: MatrixProtocol) -> float:
         columns = ["time", "dose", "time_gap"]
-        scaled = raw_protocol.copy()
+        scaled = protocol.copy()
         for i, col in enumerate(columns):
             scaled[:, i] = (
                 self.network.scalers[col]
-                .transform(raw_protocol[:, i].reshape(-1, 1))
+                .transform(protocol[:, i].reshape(-1, 1))
                 .flatten()
             )
 

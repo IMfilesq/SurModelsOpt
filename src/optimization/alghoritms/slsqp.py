@@ -4,19 +4,54 @@ from numpy import typing as npt
 
 from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
+from src.utils.converter import Converter
 from src.schemas.boundaries import Boundaries
+from src.schemas.protocols import FlatProtocol, MatrixProtocol, TupleProtocol
 
 
 class SLSQP(BaseOptimizer):
     def __init__(
         self,
+        start: TupleProtocol,
         model: BaseModel,
         boundaries: Boundaries,
-        model_input_len: int = 20,  # Stały wymiar oczekiwany przez sieć PyTorch
     ):
         self.model = model
         self.boundaries = boundaries
-        self.model_input_len = model_input_len
+        self.start = start
+
+    def scale(self, opt_protocol: npt.NDArray[np.float64]) -> FlatProtocol:
+        """Przekształca znormalizowany wektor [0, 1] na fizyczny FlatProtocol (interwały + dawki)."""
+        n = len(opt_protocol) // 2
+        time_gap_norm, dose_norm = opt_protocol[:n], opt_protocol[n:]
+
+        time_gap = self.boundaries.min_interval + time_gap_norm * (
+            self.boundaries.max_interval - self.boundaries.min_interval
+        )
+        dose = self.boundaries.min_single_dose + dose_norm * (
+            self.boundaries.max_single_dose - self.boundaries.min_single_dose
+        )
+
+        return np.concatenate([time_gap, dose])
+
+    def unscale(self, protocol: FlatProtocol) -> FlatProtocol:
+        """Przekształca fizyczny FlatProtocol (interwały + dawki) na znormalizowany wektor [0, 1]."""
+        n = len(protocol) // 2
+        time_gap, dose = protocol[:n], protocol[n:]
+
+        time_gap_norm = (time_gap - self.boundaries.min_interval) / (
+            self.boundaries.max_interval - self.boundaries.min_interval
+        )
+        dose_norm = (dose - self.boundaries.min_single_dose) / (
+            self.boundaries.max_single_dose - self.boundaries.min_single_dose
+        )
+
+        return np.concatenate([time_gap_norm, dose_norm])
+
+    def opt_to_model(self, opt_protocol: npt.NDArray[np.float64]) -> MatrixProtocol:
+        """Odskalowuje wektor optymalizatora i konwertuje go na macierz wymaganą przez model ML."""
+        physical_flat = self.scale(opt_protocol)
+        return Converter.flat_to_matrix(physical_flat)
 
     def fun(self, opt_protocol: npt.NDArray[np.float64]) -> float:
         model_protocol = self.opt_to_model(opt_protocol)
@@ -24,12 +59,10 @@ class SLSQP(BaseOptimizer):
 
     def total_dose_fun(self, opt_protocol: npt.NDArray[np.float64]) -> float:
         """Ograniczenie nierównościowe: max_total_dose - total_dose >= 0"""
-        n = len(opt_protocol) // 2
-        scaled_dose = opt_protocol[n:]
-        total_dose = np.sum(
-            self.boundaries.min_single_dose
-            + scaled_dose * (self.boundaries.max_single_dose - self.boundaries.min_single_dose)
-        )
+        physical_flat = self.scale(opt_protocol)
+        n = len(physical_flat) // 2
+        doses = physical_flat[n:]
+        total_dose = np.sum(doses)
         return float(self.boundaries.max_total_dose - total_dose)
 
     def minimize(self) -> sp.optimize.OptimizeResult:
@@ -38,7 +71,7 @@ class SLSQP(BaseOptimizer):
 
         constraints = [{"type": "ineq", "fun": self.total_dose_fun}]
 
-        x0 = np.full(n_doses * 2, 0.5)
+        x0 = self.unscale(Converter.tuples_to_flat(self.start, n_doses))
 
         result = sp.optimize.minimize(
             self.fun,
@@ -50,31 +83,3 @@ class SLSQP(BaseOptimizer):
         )
 
         return result
-
-    def opt_to_model(self, opt_protocol: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-        n = len(opt_protocol) // 2
-
-        time_gap_norm = opt_protocol[:n]
-        time_gap = self.boundaries.min_interval + time_gap_norm * (
-            self.boundaries.max_interval - self.boundaries.min_interval
-        )
-
-        dose_norm = opt_protocol[n:]
-        dose = self.boundaries.min_single_dose + dose_norm * (
-            self.boundaries.max_single_dose - self.boundaries.min_single_dose
-        )
-
-        time = time_gap.cumsum()
-        model_protocol = np.stack([time, dose, time_gap], axis=1)
-
-        # ZAWSZE dopełniamy zerami z przodu do stałej długości wejściowej sieci (np. 20)
-        if model_protocol.shape[0] < self.model_input_len:
-            pad_size = self.model_input_len - model_protocol.shape[0]
-            model_protocol = np.pad(
-                model_protocol,
-                pad_width=((pad_size, 0), (0, 0)),
-                mode="constant",
-                constant_values=0.0,
-            )
-
-        return model_protocol
