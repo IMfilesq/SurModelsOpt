@@ -6,7 +6,10 @@ model:
   training_data_path : "data/raw.csv"
 optimizer:
   _target_ : src.optimization.alghoritms.slsqp.SLSQP
+  _convert_: all  # <--- Zapewnia, że Hydra przekaże czyste list i dict do Pythona
+  start: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
   boundaries:
+    _target_: src.schemas.boundaries.Boundaries  # <--- Hydra od razu utworzy obiekt Boundaries
     min_interval : 2400
     max_interval : 72000
     min_single_dose : 0.0

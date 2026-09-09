@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
 
-import numpy as np
-from numpy import typing as npt
+from src.schemas.protocols import MatrixProtocol
+from jaxtyping import jaxtyped
+from beartype import beartype
 
 
 class BaseModel(ABC):
+
     @abstractmethod
+    @jaxtyped(typechecker=beartype)
     def predict(self,
-                raw_protocol : npt.NDArray[np.float64]) -> float:
+                protocol : MatrixProtocol) -> float:
         """Predicts number of surviving cells after given treatment protocol
         Args:
         ---------------

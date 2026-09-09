@@ -1,7 +1,8 @@
 import os
 import numpy as np
+from src.schemas.protocols import TupleProtocol
 
-def simulate(tuple_protocol: list[tuple[float, float]],
+def simulate(protocol: TupleProtocol,
              params_file: str = "/content/EMT6-Ro/data/default-parameters.json",
              tumor_file: str = "/content/EMT6-Ro/data/test_tumor.txt") -> float:
     try:
@@ -17,7 +18,7 @@ def simulate(tuple_protocol: list[tuple[float, float]],
         exp = emt.Experiment(params, [tumor_state], 50, 1)
 
         # Formatowanie i opakowanie w dodatkową listę (lista protokołów)
-        formatted_protocol = [(int(round(t)), float(d)) for t, d in tuple_protocol]
+        formatted_protocol = [(int(round(t)), float(d)) for t, d in protocol]
         exp.add_irradiations([formatted_protocol]) 
 
         exp.run(144000)

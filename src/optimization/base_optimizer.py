@@ -1,14 +1,10 @@
-
-
 from abc import ABC, abstractmethod
-from numpy import typing as npt
-import numpy as np
-from src.models.base_model import BaseModel
-from src.schemas.boundaries import Boundaries
+import scipy as sp
+
 
 class BaseOptimizer(ABC):
     @abstractmethod
-    def minimize(self) -> float:
+    def minimize(self) -> sp.optimize.OptimizeResult:
         """Minimizes the number of surviving cells after given treatment protocol
         Args:
         ---------------
