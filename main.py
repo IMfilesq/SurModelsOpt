@@ -5,6 +5,7 @@ import numpy as np
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
+from src.data.filter import filter_data
 from src.data.loader import load_raw_data
 from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
@@ -17,9 +18,26 @@ logger = logging.getLogger(__name__)
 
 def main(cfg: DictConfig) -> None:
 # loading data
-    df = load_raw_data()
-    print("Data loaded successfully.")
-    print(f"DataFrame dimensions (rows, columns): {df.shape}")
+    df = load_raw_data(cfg.data.data_path)
+    logger.info("Data loaded successfully.")
+
+    initial_series_count = df["series"].nunique()
+    logger.info(f"Data loaded successfully. Total rows: {len(df)}, Unique series: {initial_series_count}.")
+    logger.info("Filtering data based on clinical constraints...")
+    filtered_df = filter_data(
+        df=df,
+        min_single_dose=cfg.optimizer.boundaries.min_single_dose,
+        max_single_dose=cfg.optimizer.boundaries.max_single_dose,
+        max_total_dose=cfg.optimizer.boundaries.max_total_dose,
+        min_interval=cfg.optimizer.boundaries.min_interval,
+        max_interval=cfg.optimizer.boundaries.max_interval,
+    )
+    remaining_series_count = filtered_df["series"].nunique()
+    logger.info(
+        f"Filtering complete. Retained {remaining_series_count}/{initial_series_count} series "
+        f"({len(filtered_df)} rows remaining)."
+    )
+
 
     logger.info("Instantiating model from config")
     model : BaseModel = instantiate(cfg.model)
@@ -61,6 +79,7 @@ def main(cfg: DictConfig) -> None:
                          params_file = cfg.simulation.params_file,
                          tumor_file = cfg.simulation.tumor_file)
     print("simulated : ", simulated)
+
 
 
 if __name__ == "__main__":

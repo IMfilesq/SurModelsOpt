@@ -8,10 +8,10 @@ optimizer:
   _target_ : src.optimization.alghoritms.slsqp.SLSQP
   boundaries:
     min_interval : 2400
-    max_interval : 7200
+    max_interval : 72000
     min_single_dose : 0.0
     max_single_dose : 2.5
-    max_total_dose : 10.0
+    max_total_dose : 10
     max_n_doses : 20
 simulation:
   params_file : "/content/EMT6-Ro/data/default-parameters.json"
