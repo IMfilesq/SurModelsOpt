@@ -20,7 +20,7 @@ class SLSQP(BaseOptimizer):
         self.boundaries = boundaries
         self.start = start
 
-    def scale(self, opt_protocol: npt.NDArray[np.float64]) -> FlatProtocol:
+    def unnormalize(self, opt_protocol: npt.NDArray[np.float64]) -> FlatProtocol:
         """Przekształca znormalizowany wektor [0, 1] na fizyczny FlatProtocol (interwały + dawki)."""
         n = len(opt_protocol) // 2
         time_gap_norm, dose_norm = opt_protocol[:n], opt_protocol[n:]
@@ -34,7 +34,7 @@ class SLSQP(BaseOptimizer):
 
         return np.concatenate([time_gap, dose])
 
-    def unscale(self, protocol: FlatProtocol) -> FlatProtocol:
+    def normalize(self, protocol: FlatProtocol) -> FlatProtocol:
         """Przekształca fizyczny FlatProtocol (interwały + dawki) na znormalizowany wektor [0, 1]."""
         n = len(protocol) // 2
         time_gap, dose = protocol[:n], protocol[n:]
@@ -50,7 +50,7 @@ class SLSQP(BaseOptimizer):
 
     def opt_to_model(self, opt_protocol: npt.NDArray[np.float64]) -> MatrixProtocol:
         """Odskalowuje wektor optymalizatora i konwertuje go na macierz wymaganą przez model ML."""
-        physical_flat = self.scale(opt_protocol)
+        physical_flat = self.unnormalize(opt_protocol)
         return Converter.flat_to_matrix(physical_flat)
 
     def fun(self, opt_protocol: npt.NDArray[np.float64]) -> float:
@@ -59,20 +59,26 @@ class SLSQP(BaseOptimizer):
 
     def total_dose_fun(self, opt_protocol: npt.NDArray[np.float64]) -> float:
         """Ograniczenie nierównościowe: max_total_dose - total_dose >= 0"""
-        physical_flat = self.scale(opt_protocol)
+        physical_flat = self.unnormalize(opt_protocol)
         n = len(physical_flat) // 2
         doses = physical_flat[n:]
         total_dose = np.sum(doses)
         return float(self.boundaries.max_total_dose - total_dose)
 
+    def total_time_fun(self, opt_protocol: npt.NDArray[np.float64]) -> float:
+        physical_flat = self.unnormalize(opt_protocol)
+        n = len(physical_flat) // 2
+        intervals = physical_flat[:n]
+        return float(self.boundaries.max_interval - np.sum(intervals))
+
     def minimize(self) -> sp.optimize.OptimizeResult:
         n_doses = self.boundaries.max_n_doses
         bounds = [(0.0, 1.0) for _ in range(n_doses * 2)]
 
-        constraints = [{"type": "ineq", "fun": self.total_dose_fun}]
+        constraints = [{"type": "ineq", "fun": self.total_time_fun},
+                       {"type": "ineq", "fun": self.total_dose_fun}]
 
-        x0 = self.unscale(Converter.tuples_to_flat(self.start, n_doses))
-
+        x0 = self.normalize(Converter.tuples_to_flat(self.start, n_doses))
         result = sp.optimize.minimize(
             self.fun,
             x0=x0,
@@ -82,4 +88,4 @@ class SLSQP(BaseOptimizer):
             options={"maxiter": 1000, "eps": 1e-4},
         )
 
-        return result
+        return self.opt_to_model(result.x), result.fun

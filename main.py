@@ -24,26 +24,13 @@ def main(cfg: DictConfig) -> None:
     initial_series_count = df["series"].nunique()
     logger.info(f"Data loaded successfully. Total rows: {len(df)}, Unique series: {initial_series_count}.")
     logger.info("Filtering data based on clinical constraints...")
-    filtered_df = filter_data(
-        df=df,
-        min_single_dose=cfg.optimizer.boundaries.min_single_dose,
-        max_single_dose=cfg.optimizer.boundaries.max_single_dose,
-        max_total_dose=cfg.optimizer.boundaries.max_total_dose,
-        min_interval=cfg.optimizer.boundaries.min_interval,
-        max_interval=cfg.optimizer.boundaries.max_interval,
-    )
+    filtered_df = filter_data(df=df,
+                              boundaries = cfg.optimizer.boundaries)
     remaining_series_count = filtered_df["series"].nunique()
     logger.info(
         f"Filtering complete. Retained {remaining_series_count}/{initial_series_count} series "
         f"({len(filtered_df)} rows remaining)."
     )
-
-    #logger.info("Loading raw traing data")
-    # raw = load_raw_data()
-    #logger.info("Filtering out data outside of optimization boundaries")
-    # filtered = filter(raw, cfg.optimization.boundaries)
-    #logger.info("Analyzing leftover data")
-    # analysis = analyze(filtered)
 
     logger.info("Instantiating model from config")
     model : BaseModel = instantiate(cfg.model)
@@ -53,11 +40,12 @@ def main(cfg: DictConfig) -> None:
     optimizer: BaseOptimizer = instantiate(cfg.optimizer, model=model)
 
     logger.info("Seeking for optimal protocol")
-    min_result = optimizer.minimize()
-    min_at = Converter.flat_to_tuples(min_result.x)
-    print("minumum at ", min_at)
+    min_at, min_val = optimizer.minimize()
+    print("min at", min_at)
+    print("min val", min_val)
     logger.info("Running cancer growth simulation for found protocol")
-    simulated = simulate(protocol= min_at,
+    print("Tuple min protocol: ", Converter.matrix_to_tuples(min_at))
+    simulated = simulate(protocol= Converter.matrix_to_tuples(min_at),
                          params_file = cfg.simulation.params_file,
                          tumor_file = cfg.simulation.tumor_file)
     print("simulated : ", simulated)

@@ -9,6 +9,7 @@ class Converter:
     """
     Contains methods used for conversion between protocol formats
     """
+
     @staticmethod
     @jaxtyped(typechecker=beartype)
     def flat_to_matrix(flat: FlatProtocol) -> MatrixProtocol:
@@ -17,11 +18,14 @@ class Converter:
         times = np.cumsum(intervals)
 
         matrix = np.zeros((20, 3), dtype=np.float64)
-        
         limit = min(n_doses, 20)
-        matrix[:limit, 0] = doses[:limit]
-        matrix[:limit, 1] = times[:limit]
-        matrix[:limit, 2] = intervals[:limit]
+
+        if limit > 0:
+            start_idx = 20 - limit  # Indeks, od którego zaczynają się dane
+
+            matrix[start_idx:, 0] = times[:limit]      # Col 0: Cumulative Time
+            matrix[start_idx:, 1] = doses[:limit]      # Col 1: Dose
+            matrix[start_idx:, 2] = intervals[:limit]  # Col 2: Time Gap
 
         return matrix
 

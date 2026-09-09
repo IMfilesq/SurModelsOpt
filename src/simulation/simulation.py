@@ -27,5 +27,5 @@ def simulate(protocol: TupleProtocol,
         return float(np.mean(results[0, 0, :]))
 
     except (ImportError, Exception) as e:
-        print(f"⚠️ Nie można uruchomić symulacji C++/CUDA ({e}). Zwracanie wartości atrapy (350.0).")
-        return 350.0
+        print("Unable to find emt6ro simulation package, try to run collab.ipynb in google collab envirnoment. Returning dummy value")
+        return -999.0
