@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from src.schemas.optimization import OptResult
 
 
 class BaseOptimizer(ABC):
     @abstractmethod
-    def minimize(self) -> tuple[np.ndarray, float]:
+    def minimize(self) -> OptResult:
         """Minimizes the number of surviving cells after given treatment protocol
         Args:
         ---------------

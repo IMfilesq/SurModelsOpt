@@ -66,8 +66,8 @@ class Converter:
     @staticmethod
     @jaxtyped(typechecker=beartype)
     def matrix_to_tuples(matrix: MatrixProtocol) -> TupleProtocol:
-        doses = matrix[:, 0]
-        times = matrix[:, 1]
+        doses = matrix[:, 1]
+        times = matrix[:, 0]
         valid_mask = doses > 0
         return list(zip(times[valid_mask].tolist(), doses[valid_mask].tolist()))
 
