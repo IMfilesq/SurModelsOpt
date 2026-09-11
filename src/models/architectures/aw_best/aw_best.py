@@ -12,11 +12,11 @@ from beartype import beartype
 
 
 class AW_Best(BaseModel):
+
     def __init__(
         self,
         training_data_path: str = "data/data.csv",
-        ckpt_path: str = "data/models/aw_best.ckpt",
-    ):
+        ckpt_path: str = "data/models/aw_best.ckpt",):
         sub_config = {
             "n_h": 32,
             "n_l": 3,
@@ -45,6 +45,10 @@ class AW_Best(BaseModel):
         )
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.network.eval().to(self.device)
+
+    @property
+    def model_name(self) -> str:
+        return "3HeadLSTM+MRL"
         
     @jaxtyped(typechecker=beartype)
     def predict(self, protocol: MatrixProtocol) -> float:
@@ -66,6 +70,7 @@ class AW_Best(BaseModel):
             prediction = output[0, 0, 0].item() * self.network.target_scale
 
         return np.array([prediction], dtype=np.float64)[0]
+
 
 
 

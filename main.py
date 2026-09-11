@@ -12,7 +12,7 @@ from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
 from src.simulation.simulation  import simulate
 from src.utils.converter import Converter
-from src.utils.reporter import generate_opt_report
+from src.utils.reporter import generate_report
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
@@ -43,21 +43,23 @@ def main(cfg: DictConfig) -> None:
     optimizer: BaseOptimizer = instantiate(cfg.optimizer, model=model)
 
     logger.info("Seeking for optimal protocol")
-    result = optimizer.minimize()
+    opt_result = optimizer.minimize()
 
-
-    output_dir = HydraConfig.get().runtime.output_dir
-    report_path = Path(output_dir) / "opt_result.html"
-    logger.info(f"Creating report at: {report_path}")
-    generate_opt_report(result=result, filename=str(report_path))
-
-
-    print(result)
     logger.info("Running cancer growth simulation for found protocol")
-    simulated = simulate(protocol= result.min_protocol,
+    simulated = simulate(protocol= opt_result.min_protocol,
                          params_file = cfg.simulation.params_file,
                          tumor_file = cfg.simulation.tumor_file)
     print("simulated : ", simulated)
+
+    output_dir = HydraConfig.get().runtime.output_dir
+    report_path = Path(output_dir) / "run_report.html"
+    logger.info(f"Creating report at: {report_path}")
+
+    generate_report(model_name = model.model_name,
+                     opt_result=opt_result,
+                     sim_val = simulated,
+                     boundaries = cfg.optimizer.boundaries,
+                     filename=str(report_path))
 
 
 

@@ -5,7 +5,7 @@ model:
   ckpt_path : "data/models/aw_best.ckpt"
   training_data_path : "data/raw.csv"
 optimizer:
-  _target_ : src.optimization.alghoritms.slsqp.SLSQP
+  _target_ : src.optimization.scipy.alghoritms.basin_hopping.BasinHopping
   _convert_: all  # <--- Zapewnia, że Hydra przekaże czyste list i dict do Pythona
   start: [[40000.0, 1.0], [50000.0, 1.0], [60000.0, 1.0], [70000.0, 1.0]]
   boundaries:

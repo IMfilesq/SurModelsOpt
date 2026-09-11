@@ -6,6 +6,10 @@ from beartype import beartype
 
 
 class BaseModel(ABC):
+    @property
+    @abstractmethod
+    def model_name(self) -> str:
+        pass
 
     @abstractmethod
     @jaxtyped(typechecker=beartype)
