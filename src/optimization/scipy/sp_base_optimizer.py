@@ -67,7 +67,7 @@ class ScipyBaseOptimizer(BaseOptimizer, ABC):
         physical_flat = self.unnormalize(opt_protocol)
         n = len(physical_flat) // 2
         intervals = physical_flat[:n]
-        return float(self.boundaries.max_interval - np.sum(intervals))
+        return float(self.boundaries.max_total_time - np.sum(intervals))
 
     def get_bounds(self) -> list[tuple[float, float]]:
         return [(0.0, 1.0) for _ in range(self.boundaries.max_n_doses * 2)]

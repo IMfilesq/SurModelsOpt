@@ -1,21 +1,9 @@
-import pandas as pd
-from jinja2 import Template
 
-from src.schemas.boundaries import Boundaries
-from src.schemas.optimization import OptResult
-from src.schemas.protocols import TupleProtocol
-
-
-def protocol_to_dataframe(protocol: TupleProtocol) -> pd.DataFrame:
-    return pd.DataFrame(protocol, columns=["Time", "Dose"])
-
-
-REPORT_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Optimization Report - {{ model_name }}</title>
+    <title>Optimization Report - 3HeadLSTM+MRL</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body { background-color: #f4f6f9; padding: 30px; font-family: system-ui, -apple-system, sans-serif; }
@@ -33,8 +21,8 @@ REPORT_TEMPLATE = """
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>📊 Optimization Report</h2>
             <div>
-                <span class="badge badge-model px-3 py-2 me-1">Model: {{ model_name }}</span>
-                <span class="badge badge-opt px-3 py-2">Algorithm: {{ opt_result.opt_name }}</span>
+                <span class="badge badge-model px-3 py-2 me-1">Model: 3HeadLSTM+MRL</span>
+                <span class="badge badge-opt px-3 py-2">Algorithm: SLSQP</span>
             </div>
         </div>
 
@@ -43,25 +31,25 @@ REPORT_TEMPLATE = """
             <div class="col-md-3">
                 <div class="card p-3 text-center">
                     <div class="kpi-title">Min Val (Opt)</div>
-                    <div class="kpi-value text-success">{{ "%.6f"|format(opt_result.min_val) }}</div>
+                    <div class="kpi-value text-success">332.739294</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card p-3 text-center">
                     <div class="kpi-title">Simulation Result</div>
-                    <div class="kpi-value text-primary">{{ "%.6f"|format(sim_val) }}</div>
+                    <div class="kpi-value text-primary">-999.000000</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card p-3 text-center">
                     <div class="kpi-title">Search Time [s]</div>
-                    <div class="kpi-value">{{ "%.2f"|format(opt_result.search_time) }}</div>
+                    <div class="kpi-value">92.53</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card p-3 text-center">
                     <div class="kpi-title">Iterations / Calls</div>
-                    <div class="kpi-value">{{ opt_result.n_iter }} / {{ opt_result.n_calls }}</div>
+                    <div class="kpi-value">101 / 4378</div>
                 </div>
             </div>
         </div>
@@ -86,23 +74,23 @@ REPORT_TEMPLATE = """
                     <tbody>
                         <tr>
                             <td class="text-start fw-bold text-muted">Limit (Boundaries)</td>
-                            <td>{{ boundaries.min_interval }}</td>
-                            <td>{{ boundaries.max_interval }}</td>
-                            <td>{{ boundaries.max_total_time }}</td>
-                            <td>{{ boundaries.min_single_dose }}</td>
-                            <td>{{ boundaries.max_single_dose }}</td>
-                            <td>{{ boundaries.max_total_dose }}</td>
-                            <td>{{ boundaries.max_n_doses }}</td>
+                            <td>2400</td>
+                            <td>72000</td>
+                            <td>72000</td>
+                            <td>0.0</td>
+                            <td>2.5</td>
+                            <td>10</td>
+                            <td>20</td>
                         </tr>
                         <tr class="table-white">
                             <td class="text-start fw-bold text-primary">Actual (Protocol)</td>
-                            <td>{{ "%.2f"|format(bounds_check.min_interval) }}</td>
-                            <td>{{ "%.2f"|format(bounds_check.max_interval) }}</td>
-                            <td>{{ "%.2f"|format(bounds_check.max_total_time) }}</td>
-                            <td>{{ "%.4f"|format(bounds_check.min_single_dose) }}</td>
-                            <td>{{ "%.4f"|format(bounds_check.max_single_dose) }}</td>
-                            <td>{{ "%.4f"|format(bounds_check.max_total_dose) }}</td>
-                            <td>{{ bounds_check.max_n_doses }}</td>
+                            <td>2400.00</td>
+                            <td>8792.08</td>
+                            <td>72034.95</td>
+                            <td>0.0000</td>
+                            <td>2.5000</td>
+                            <td>10.0004</td>
+                            <td>20</td>
                         </tr>
                     </tbody>
                 </table>
@@ -113,42 +101,119 @@ REPORT_TEMPLATE = """
         <div class="card p-4 mb-4">
             <h5 class="card-title mb-3 text-success">Optimal Protocol (min_protocol)</h5>
             <div class="table-responsive">
-                {{ min_protocol_table }}
+                <table border="1" class="dataframe table table-sm table-striped table-hover align-middle table-custom">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Time</th>
+      <th>Dose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>8010.381314</td>
+      <td>3.859795e-05</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>11353.728315</td>
+      <td>3.866926e-05</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>15384.017521</td>
+      <td>1.592983e-05</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>18793.670063</td>
+      <td>3.008921e-05</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>22234.735369</td>
+      <td>2.228814e-07</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>25582.563270</td>
+      <td>1.451221e-07</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>28891.717768</td>
+      <td>1.623273e-07</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>32298.995818</td>
+      <td>2.031205e-07</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>35562.916513</td>
+      <td>2.743520e-07</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>38379.985739</td>
+      <td>4.837803e-07</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>41055.947503</td>
+      <td>7.854154e-08</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>44666.718682</td>
+      <td>3.237457e-07</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>47067.835776</td>
+      <td>2.021848e-07</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>49467.843419</td>
+      <td>3.354047e-07</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>53642.751098</td>
+      <td>1.502160e-07</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>56042.752949</td>
+      <td>8.583032e-01</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>58442.757830</td>
+      <td>2.499871e+00</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>67234.838939</td>
+      <td>1.642196e+00</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>69634.882973</td>
+      <td>2.499965e+00</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>72034.946589</td>
+      <td>2.499927e+00</td>
+    </tr>
+  </tbody>
+</table>
             </div>
         </div>
     </div>
 </body>
 </html>
-"""
-
-
-def generate_report(
-    model_name: str,
-    opt_result: OptResult,
-    sim_val: float,
-    boundaries: Boundaries,
-    bounds_check: Boundaries,
-    filename: str = "opt_report.html",
-) -> None:
-    # 1. Convert optimal protocol to HTML DataFrame
-    df_min = protocol_to_dataframe(opt_result.min_protocol)
-    min_protocol_table_html = df_min.to_html(
-        classes="table table-sm table-striped table-hover align-middle table-custom",
-        index=True,
-        index_names=True,
-    )
-
-    # 2. Render Jinja2 template
-    template = Template(REPORT_TEMPLATE)
-    rendered_html = template.render(
-        model_name=model_name,
-        opt_result=opt_result,
-        sim_val=sim_val,
-        boundaries=boundaries,
-        bounds_check=bounds_check,
-        min_protocol_table=min_protocol_table_html,
-    )
-
-    # 3. Write output HTML file
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(rendered_html)

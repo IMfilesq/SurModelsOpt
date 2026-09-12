@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Optimization Report - 3HeadLSTM+MRL</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f4f6f9; padding: 30px; font-family: system-ui, -apple-system, sans-serif; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .kpi-title { font-size: 0.8rem; color: #6c757d; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
+        .badge-model { font-size: 0.9rem; background-color: #0d6efd; }
+        .badge-opt { font-size: 0.9rem; background-color: #6c757d; }
+        .table-custom th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1000px;">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📊 Optimization Report</h2>
+            <div>
+                <span class="badge badge-model px-3 py-2 me-1">Model: 3HeadLSTM+MRL</span>
+                <span class="badge badge-opt px-3 py-2">Algorithm: BasinHopping_SLSQP</span>
+            </div>
+        </div>
+
+        <!-- KPI Metrics -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Min Val (Opt)</div>
+                    <div class="kpi-value text-success">295.275569</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Simulation Result</div>
+                    <div class="kpi-value text-primary">284.080000</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Search Time [s]</div>
+                    <div class="kpi-value">1038.27</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Iterations / Calls</div>
+                    <div class="kpi-value">15 / 32505</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constraints (Boundaries) -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title mb-3">⚙️ Constraints (Boundaries)</h5>
+            <div class="row text-center g-2">
+                <div class="col-md-2 border-end">
+                    <small class="text-muted d-block">Min Interval</small>
+                    <strong>2400</strong>
+                </div>
+                <div class="col-md-2 border-end">
+                    <small class="text-muted d-block">Max Interval</small>
+                    <strong>72000</strong>
+                </div>
+                <div class="col-md-2 border-end">
+                    <small class="text-muted d-block">Min Dose</small>
+                    <strong>0.0</strong>
+                </div>
+                <div class="col-md-2 border-end">
+                    <small class="text-muted d-block">Max Dose</small>
+                    <strong>2.5</strong>
+                </div>
+                <div class="col-md-2 border-end">
+                    <small class="text-muted d-block">Max Total Dose</small>
+                    <strong>10</strong>
+                </div>
+                <div class="col-md-2">
+                    <small class="text-muted d-block">Max Doses</small>
+                    <strong>20</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Protocols: Initial vs Optimal -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5 class="card-title mb-3 text-muted">Initial Protocol (start)</h5>
+                    <div class="table-responsive">
+                        <table border="1" class="dataframe table table-sm table-striped align-middle table-custom">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Time</th>
+      <th>Dose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>40000.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>50000.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>60000.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>70000.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5 class="card-title mb-3 text-success">Optimal Protocol (min_protocol)</h5>
+                    <div class="table-responsive">
+                        <table border="1" class="dataframe table table-sm table-striped table-hover align-middle table-custom">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Time</th>
+      <th>Dose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>3398.009193</td>
+      <td>8.758468e-11</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5798.009205</td>
+      <td>8.572124e-11</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>8198.009205</td>
+      <td>8.271428e-11</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>10598.009205</td>
+      <td>8.096910e-11</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>12998.009205</td>
+      <td>7.877173e-11</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>15398.009205</td>
+      <td>7.581872e-11</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>17798.009205</td>
+      <td>7.302220e-11</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>20198.009205</td>
+      <td>6.834519e-11</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>22598.009205</td>
+      <td>6.598910e-11</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>24998.009205</td>
+      <td>5.977469e-11</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>27398.009205</td>
+      <td>5.002450e-11</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>29798.009205</td>
+      <td>3.080563e-11</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>32198.009205</td>
+      <td>6.578484e-13</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>36998.009205</td>
+      <td>1.781403e+00</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>39398.009230</td>
+      <td>2.500000e+00</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>55323.347773</td>
+      <td>2.500000e+00</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>65206.980396</td>
+      <td>1.910490e-10</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>68201.241860</td>
+      <td>7.185974e-01</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>72000.000021</td>
+      <td>2.500000e+00</td>
+    </tr>
+  </tbody>
+</table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

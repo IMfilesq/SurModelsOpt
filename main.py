@@ -11,8 +11,8 @@ from src.data.loader import load_raw_data
 from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
 from src.simulation.simulation  import simulate
-from src.utils.converter import Converter
 from src.utils.reporter import generate_report
+from src.utils.check_bounds import check_bounds
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
@@ -59,6 +59,7 @@ def main(cfg: DictConfig) -> None:
                      opt_result=opt_result,
                      sim_val = simulated,
                      boundaries = cfg.optimizer.boundaries,
+                     bounds_check = check_bounds(opt_result.min_protocol),
                      filename=str(report_path))
 
 

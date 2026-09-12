@@ -5,7 +5,7 @@ model:
   ckpt_path : "data/models/aw_best.ckpt"
   training_data_path : "data/raw.csv"
 optimizer:
-  _target_ : src.optimization.scipy.alghoritms.basin_hopping.BasinHopping
+  _target_ : src.optimization.scipy.alghoritms.slsqp.SLSQP
   _convert_: all  # <--- Zapewnia, że Hydra przekaże czyste list i dict do Pythona
   start: [[40000.0, 1.0], [50000.0, 1.0], [60000.0, 1.0], [70000.0, 1.0]]
   boundaries:
@@ -15,6 +15,7 @@ optimizer:
     min_single_dose : 0.0
     max_single_dose : 2.5
     max_total_dose : 10
+    max_total_time : 72000
     max_n_doses : 20
 simulation:
   params_file : "/content/EMT6-Ro/data/default-parameters.json"
