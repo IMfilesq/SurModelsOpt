@@ -1,11 +1,18 @@
 import pandas as pd
+
+from src.schemas.boundaries import Boundaries
+
+
+from typing import cast
+import pandas as pd
+
 from src.schemas.boundaries import Boundaries
 
 
 def filter_data(
     df: pd.DataFrame,
-    boundaries : Boundaries,
-    ) -> pd.DataFrame:
+    boundaries: Boundaries,
+) -> pd.DataFrame:
     """Filteres out protocols that do not satisfy boundaries"""
 
     filtered_df = df.copy()
@@ -15,9 +22,11 @@ def filter_data(
         & (filtered_df["dose"] <= boundaries.max_single_dose)
     ).groupby(filtered_df["series"]).transform("all")
 
-    valid_total_dose = (
-        filtered_df.groupby("series")["dose"].transform("sum") <= boundaries.max_total_dose
+    total_dose_series = cast(
+        pd.Series,
+        filtered_df.groupby("series")["dose"].transform("sum")
     )
+    valid_total_dose = total_dose_series <= boundaries.max_total_dose
 
     has_positive_dose = filtered_df["dose"] > 0
     valid_gap_range = (filtered_df["time_gap"] >= boundaries.min_interval) & (
@@ -32,4 +41,6 @@ def filter_data(
     )
 
     protocol_mask = valid_single_dose & valid_total_dose & valid_intervals
-    return filtered_df[protocol_mask]
+
+    # cast na pd.DataFrame gwarantuje zgodność z typem zwracanym w definicji funkcji
+    return cast(pd.DataFrame, filtered_df[protocol_mask])

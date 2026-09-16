@@ -1,12 +1,15 @@
 import os
+
 import numpy as np
+
 from src.schemas.protocols import TupleProtocol
+
 
 def simulate(protocol: TupleProtocol,
              params_file: str = "/content/EMT6-Ro/data/default-parameters.json",
              tumor_file: str = "/content/EMT6-Ro/data/test_tumor.txt") -> float:
     try:
-        import emt6ro.simulation as emt # type: ignore
+        import emt6ro.simulation as emt  # type: ignore
 
         if not os.path.exists(params_file) or not os.path.exists(tumor_file):
             raise FileNotFoundError("Brak plików konfiguracyjnych symulatora.")
@@ -18,7 +21,7 @@ def simulate(protocol: TupleProtocol,
         exp = emt.Experiment(params, [tumor_state], 50, 1)
 
         # Formatowanie i opakowanie w dodatkową listę (lista protokołów)
-        formatted_protocol = [(int(round(t)), float(d)) for t, d in protocol]
+        formatted_protocol = [(round(t), float(d)) for t, d in protocol]
         exp.add_irradiations([formatted_protocol]) 
 
         exp.run(144000)
@@ -26,6 +29,6 @@ def simulate(protocol: TupleProtocol,
         results = exp.get_results()
         return float(np.mean(results[0, 0, :]))
 
-    except (ImportError, Exception) as e:
+    except (ImportError):
         print("Unable to find emt6ro simulation package, try to run collab.ipynb in google collab envirnoment. Returning dummy value")
         return -999.0

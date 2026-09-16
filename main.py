@@ -1,18 +1,18 @@
 import logging
+from pathlib import Path
 
 import hydra
-from hydra.utils import instantiate
 from hydra.core.hydra_config import HydraConfig
+from hydra.utils import instantiate
 from omegaconf import DictConfig
-from pathlib import Path
 
 from src.data.filter import filter_data
 from src.data.loader import load_raw_data
 from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
-from src.simulation.simulation  import simulate
-from src.utils.reporter import generate_report
+from src.simulation.simulation import simulate
 from src.utils.check_bounds import check_bounds
+from src.utils.reporter import generate_report
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",

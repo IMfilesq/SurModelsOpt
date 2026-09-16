@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
-from src.schemas.protocols import MatrixProtocol
-from jaxtyping import jaxtyped
 from beartype import beartype
+from jaxtyping import jaxtyped
+
+from src.schemas.protocols import MatrixProtocol
 
 
 class BaseModel(ABC):

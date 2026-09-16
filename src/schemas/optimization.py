@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+
 from src.schemas.protocols import TupleProtocol
+
 
 @dataclass
 class OptResult:

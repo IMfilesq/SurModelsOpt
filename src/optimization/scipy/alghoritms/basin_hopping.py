@@ -1,4 +1,5 @@
 import time
+
 import numpy as np
 import scipy as sp
 
@@ -55,9 +56,7 @@ class BasinHopping(ScipyBaseOptimizer):
         # 2. Sprawdzenie ograniczeń z get_constraints()
         for constraint in self.get_constraints():
             val = constraint["fun"](x)
-            if constraint["type"] == "ineq" and val < -self.tol:
-                return False
-            elif constraint["type"] == "eq" and abs(val) > self.tol:
+            if constraint["type"] == "ineq" and val < -self.tol or constraint["type"] == "eq" and abs(val) > self.tol:
                 return False
 
         return True

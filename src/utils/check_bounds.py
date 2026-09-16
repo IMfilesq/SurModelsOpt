@@ -1,6 +1,8 @@
+import numpy as np
+
 from src.schemas.boundaries import Boundaries
 from src.schemas.protocols import TupleProtocol
-import numpy as np
+
 
 def check_bounds(protocol : TupleProtocol) -> Boundaries:
     doses = [dose for time, dose in protocol]

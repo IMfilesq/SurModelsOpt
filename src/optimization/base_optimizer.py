@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import numpy as np
+
 from src.schemas.optimization import OptResult
 
 

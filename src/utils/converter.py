@@ -1,8 +1,8 @@
 import numpy as np
-from jaxtyping import jaxtyped
 from beartype import beartype
+from jaxtyping import jaxtyped
 
-from src.schemas.protocols import TupleProtocol, FlatProtocol, MatrixProtocol
+from src.schemas.protocols import FlatProtocol, MatrixProtocol, TupleProtocol
 
 
 class Converter:

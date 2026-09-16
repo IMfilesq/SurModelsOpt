@@ -1,13 +1,13 @@
-import scipy as sp
 import time
 
+import scipy as sp
 
 from src.models.base_model import BaseModel
-from src.utils.converter import Converter
-from src.schemas.boundaries import Boundaries
-from src.schemas.protocols import TupleProtocol
-from src.schemas.optimization import OptResult
 from src.optimization.scipy.sp_base_optimizer import ScipyBaseOptimizer
+from src.schemas.boundaries import Boundaries
+from src.schemas.optimization import OptResult
+from src.schemas.protocols import TupleProtocol
+from src.utils.converter import Converter
 
 
 class SLSQP(ScipyBaseOptimizer):
