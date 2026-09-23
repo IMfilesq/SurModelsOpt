@@ -1,7 +1,9 @@
+from networkx import jaccard_coefficient
 import numpy as np
 from beartype import beartype
 from jaxtyping import jaxtyped
 
+from src.schemas.boundaries import Boundaries
 from src.schemas.protocols import FlatProtocol, MatrixProtocol, TupleProtocol
 
 
@@ -40,7 +42,8 @@ class Converter:
     @staticmethod
     @jaxtyped(typechecker=beartype)
     def flat_to_tuples(flat: FlatProtocol) -> TupleProtocol:
-        intervals, doses = flat[:20], flat[20:]
+        n_protocols = flat.size//2
+        intervals, doses = flat[:n_protocols], flat[n_protocols:]
         times = np.cumsum(intervals)
         valid_mask = doses > 0
         return list(zip(times[valid_mask].tolist(), doses[valid_mask].tolist()))
@@ -76,3 +79,26 @@ class Converter:
     def tuples_to_matrix(tuples: TupleProtocol) -> MatrixProtocol:
         flat = Converter.tuples_to_flat(tuples)
         return Converter.flat_to_matrix(flat)
+
+    @staticmethod
+    @jaxtyped(typechecker=beartype)
+    def round_to_valid(protocol : TupleProtocol):
+        rounded = [(int(time), dose) for time, dose in protocol]
+
+    
+    @staticmethod
+    @jaxtyped(typechecker=beartype)
+    def make_stricter(bounds : Boundaries):
+        tol = bounds.safety_eps
+        stricter = Boundaries(bounds.min_interval + tol,
+                              bounds.max_interval - tol,
+                              bounds.min_single_dose + tol,
+                              bounds.max_single_dose - tol,
+                              bounds.max_total_dose - tol,
+                              bounds.max_total_time - tol,
+                              bounds.max_n_doses,
+                              tol,)
+        return stricter
+
+    
+        

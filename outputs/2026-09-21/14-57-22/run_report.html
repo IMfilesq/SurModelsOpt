@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Optimization Report - 3HeadLSTM+MRL</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f4f6f9; padding: 30px; font-family: system-ui, -apple-system, sans-serif; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .kpi-title { font-size: 0.8rem; color: #6c757d; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
+        .badge-model { font-size: 0.9rem; background-color: #0d6efd; }
+        .badge-opt { font-size: 0.9rem; background-color: #6c757d; }
+        .table-custom th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1000px;">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📊 Optimization Report</h2>
+            <div>
+                <span class="badge badge-model px-3 py-2 me-1">Model: 3HeadLSTM+MRL</span>
+                <span class="badge badge-opt px-3 py-2">Algorithm: Differential Evolution</span>
+            </div>
+        </div>
+
+        <!-- KPI Metrics -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Min Val (Opt)</div>
+                    <div class="kpi-value text-success">281.213969</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Simulation Result</div>
+                    <div class="kpi-value text-primary">-999.000000</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Search Time [s]</div>
+                    <div class="kpi-value">101.19</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Iterations / Calls</div>
+                    <div class="kpi-value">2552 / 888</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constraints Validation Table -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title mb-3">⚙️ Constraints Validation (Limits vs Actual)</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle text-center mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start">Metric</th>
+                            <th>Min Interval</th>
+                            <th>Max Interval</th>
+                            <th>Max Total Time</th>
+                            <th>Min Single Dose</th>
+                            <th>Max Single Dose</th>
+                            <th>Max Total Dose</th>
+                            <th>N Doses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-start fw-bold text-muted">Limit (Boundaries)</td>
+                            <td>2400</td>
+                            <td>72000</td>
+                            <td>72000</td>
+                            <td>0.0</td>
+                            <td>2.5</td>
+                            <td>10</td>
+                            <td>5</td>
+                        </tr>
+                        <tr class="table-white">
+                            <td class="text-start fw-bold text-primary">Actual (Protocol)</td>
+                            <td>2400.00</td>
+                            <td>35908.35</td>
+                            <td>72000.00</td>
+                            <td>0.0000</td>
+                            <td>2.5000</td>
+                            <td>10.0000</td>
+                            <td>5</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Optimal Protocol -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title mb-3 text-success">Optimal Protocol (min_protocol)</h5>
+            <div class="table-responsive">
+                <table border="1" class="dataframe table table-sm table-striped table-hover align-middle table-custom">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Time</th>
+      <th>Dose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>35908.352595</td>
+      <td>2.295062e-12</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>38308.352595</td>
+      <td>2.500000e+00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>52158.733636</td>
+      <td>2.500000e+00</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>62245.856046</td>
+      <td>2.500000e+00</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>71999.998301</td>
+      <td>2.500000e+00</td>
+    </tr>
+  </tbody>
+</table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

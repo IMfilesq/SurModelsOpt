@@ -1,9 +1,26 @@
+import base64
+import io
+from typing import Optional
+
+import matplotlib.figure
 import pandas as pd
 from jinja2 import Template
 
+from src.schemas.analysis import DatasetAnalysis
 from src.schemas.boundaries import Boundaries
 from src.schemas.optimization import OptResult
 from src.schemas.protocols import TupleProtocol
+
+
+def fig_to_base64(fig: Optional[matplotlib.figure.Figure]) -> Optional[str]:
+    """Konwertuje obiekt Matplotlib Figure na string data-URL w formacie Base64 PNG."""
+    if fig is None:
+        return None
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", bbox_inches="tight", dpi=150)
+    buf.seek(0)
+    encoded = base64.b64encode(buf.read()).decode("utf-8")
+    return f"data:image/png;base64,{encoded}"
 
 
 def protocol_to_dataframe(protocol: TupleProtocol) -> pd.DataFrame:
@@ -25,6 +42,7 @@ REPORT_TEMPLATE = """
         .badge-model { font-size: 0.9rem; background-color: #0d6efd; }
         .badge-opt { font-size: 0.9rem; background-color: #6c757d; }
         .table-custom th { background-color: #f8f9fa; }
+        .section-header { border-bottom: 2px solid #e9ecef; padding-bottom: 8px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -38,17 +56,17 @@ REPORT_TEMPLATE = """
             </div>
         </div>
 
-        <!-- KPI Metrics -->
+        <!-- KPI Metrics (Optimization) -->
         <div class="row g-3 mb-4">
             <div class="col-md-3">
                 <div class="card p-3 text-center">
-                    <div class="kpi-title">Min Val (Opt)</div>
+                    <div class="kpi-title">Found Model Surface Min</div>
                     <div class="kpi-value text-success">{{ "%.6f"|format(opt_result.min_val) }}</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card p-3 text-center">
-                    <div class="kpi-title">Simulation Result</div>
+                    <div class="kpi-title">Simulation Val</div>
                     <div class="kpi-value text-primary">{{ "%.6f"|format(sim_val) }}</div>
                 </div>
             </div>
@@ -66,6 +84,74 @@ REPORT_TEMPLATE = """
             </div>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION: Analysis of Constraint-Satisfying Data                   -->
+        <!-- ================================================================= -->
+        <div class="card p-4 mb-4 border-start border-4 border-info">
+            <h4 class="card-title section-header text-dark fw-bold">
+                📈 Analysis of Constraint-Satisfying Data
+            </h4>
+
+            <!-- Dataset Summary KPIs -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card p-3 text-center bg-light border-0">
+                        <div class="kpi-title">Leftover Protocol Count</div>
+                        <div class="kpi-value text-secondary">{{ analysis_result.total_series_count }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center bg-light border-0">
+                        <div class="kpi-title">Min Cancer Cells</div>
+                        <div class="kpi-value text-danger">
+                            {{ "%.4e"|format(analysis_result.min_cancer_cells) if analysis_result.min_cancer_cells < 0.001 else "%.2f"|format(analysis_result.min_cancer_cells) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center bg-light border-0">
+                        <div class="kpi-title">Mean Cancer Cells</div>
+                        <div class="kpi-value text-dark">
+                            {{ "%.4e"|format(analysis_result.mean_cancer_cells) if analysis_result.mean_cancer_cells < 0.001 else "%.2f"|format(analysis_result.mean_cancer_cells) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histograms Grid -->
+            {% if cancer_cells_hist_base64 or dose_hist_base64 or total_dose_hist_base64 %}
+            <div class="row g-3">
+                {% if cancer_cells_hist_base64 %}
+                <div class="col-md-4">
+                    <div class="card p-3 text-center h-100 bg-white border">
+                        <div class="kpi-title mb-2">Cancer Cells Distribution</div>
+                        <img src="{{ cancer_cells_hist_base64 }}" class="img-fluid rounded" alt="Cancer Cells Histogram">
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if dose_hist_base64 %}
+                <div class="col-md-4">
+                    <div class="card p-3 text-center h-100 bg-white border">
+                        <div class="kpi-title mb-2">Single Dose Distribution</div>
+                        <img src="{{ dose_hist_base64 }}" class="img-fluid rounded" alt="Single Dose Histogram">
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if total_dose_hist_base64 %}
+                <div class="col-md-4">
+                    <div class="card p-3 text-center h-100 bg-white border">
+                        <div class="kpi-title mb-2">Total Dose Distribution</div>
+                        <img src="{{ total_dose_hist_base64 }}" class="img-fluid rounded" alt="Total Dose Histogram">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <!-- ================================================================= -->
+
         <!-- Constraints Validation Table -->
         <div class="card p-4 mb-4">
             <h5 class="card-title mb-3">⚙️ Constraints Validation (Limits vs Actual)</h5>
@@ -80,7 +166,6 @@ REPORT_TEMPLATE = """
                             <th>Min Single Dose</th>
                             <th>Max Single Dose</th>
                             <th>Max Total Dose</th>
-                            <th>N Doses</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,7 +177,6 @@ REPORT_TEMPLATE = """
                             <td>{{ boundaries.min_single_dose }}</td>
                             <td>{{ boundaries.max_single_dose }}</td>
                             <td>{{ boundaries.max_total_dose }}</td>
-                            <td>{{ boundaries.max_n_doses }}</td>
                         </tr>
                         <tr class="table-white">
                             <td class="text-start fw-bold text-primary">Actual (Protocol)</td>
@@ -102,7 +186,6 @@ REPORT_TEMPLATE = """
                             <td>{{ "%.4f"|format(bounds_check.min_single_dose) }}</td>
                             <td>{{ "%.4f"|format(bounds_check.max_single_dose) }}</td>
                             <td>{{ "%.4f"|format(bounds_check.max_total_dose) }}</td>
-                            <td>{{ bounds_check.max_n_doses }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -128,6 +211,7 @@ def generate_report(
     sim_val: float,
     boundaries: Boundaries,
     bounds_check: Boundaries,
+    analysis_result: DatasetAnalysis,
     filename: str = "opt_report.html",
 ) -> None:
     # 1. Convert optimal protocol to HTML DataFrame
@@ -138,7 +222,12 @@ def generate_report(
         index_names=True,
     )
 
-    # 2. Render Jinja2 template
+    # 2. Convert matplotlib figures to base64
+    cancer_cells_hist_base64 = fig_to_base64(analysis_result.cancer_cells_histogram)
+    dose_hist_base64 = fig_to_base64(analysis_result.dose_histogram)
+    total_dose_hist_base64 = fig_to_base64(analysis_result.total_dose_histogram)
+
+    # 3. Render Jinja2 template
     template = Template(REPORT_TEMPLATE)
     rendered_html = template.render(
         model_name=model_name,
@@ -146,9 +235,13 @@ def generate_report(
         sim_val=sim_val,
         boundaries=boundaries,
         bounds_check=bounds_check,
+        analysis_result=analysis_result,
+        cancer_cells_hist_base64=cancer_cells_hist_base64,
+        dose_hist_base64=dose_hist_base64,
+        total_dose_hist_base64=total_dose_hist_base64,
         min_protocol_table=min_protocol_table_html,
     )
 
-    # 3. Write output HTML file
+    # 4. Write output HTML file
     with open(filename, "w", encoding="utf-8") as f:
         f.write(rendered_html)

@@ -8,6 +8,8 @@ from src.optimization.base_optimizer import BaseOptimizer
 from src.schemas.boundaries import Boundaries
 from src.schemas.protocols import FlatProtocol, MatrixProtocol, TupleProtocol
 from src.utils.converter import Converter
+from scipy.optimize import NonlinearConstraint
+from src.utils.converter import Converter
 
 
 class ScipyBaseOptimizer(BaseOptimizer, ABC):
@@ -18,7 +20,7 @@ class ScipyBaseOptimizer(BaseOptimizer, ABC):
         boundaries: Boundaries,
     ):
         self.model = model
-        self.boundaries = boundaries
+        self.boundaries = Converter.make_stricter(boundaries)
         self.start = start
 
     def unnormalize(self, opt_protocol: npt.NDArray[np.float64]) -> FlatProtocol:
@@ -71,6 +73,13 @@ class ScipyBaseOptimizer(BaseOptimizer, ABC):
 
     def get_bounds(self) -> list[tuple[float, float]]:
         return [(0.0, 1.0) for _ in range(self.boundaries.max_n_doses * 2)]
+
+    def get_de_constraints(self) -> list[NonlinearConstraint]:
+        """Format ograniczeń wymagany przez differential_evolution."""
+        return [
+            NonlinearConstraint(self.total_time_fun, 0.0, np.inf),
+            NonlinearConstraint(self.total_dose_fun, 0.0, np.inf),
+        ]
 
     def get_constraints(self) -> list[dict]:
         return [

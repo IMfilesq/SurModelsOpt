@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-import matplotlib.pyplot as plt
 
 import hydra
 from hydra.core.hydra_config import HydraConfig
@@ -23,41 +22,15 @@ logger = logging.getLogger(__name__)
 
 def main(cfg: DictConfig) -> None:
 # loading data
+    logger.info("loading raw data")
     df = load_raw_data(cfg.data.data_path)
-    logger.info("Data loaded successfully.")
 
-    initial_series_count = df["series"].nunique()
-    logger.info(f"Data loaded successfully. Total rows: {len(df)}, Unique series: {initial_series_count}.")
-    logger.info("Filtering data based on clinical constraints...")
+    logger.info("filtering raw data with respect to constrains")
     filtered_df = filter_data(df=df,
                               boundaries = cfg.optimizer.boundaries)
-    remaining_series_count = filtered_df["series"].nunique()
-    logger.info(
-        f"Filtering complete. Retained {remaining_series_count}/{initial_series_count} series "
-        f"({len(filtered_df)} rows remaining)."
-    )
-
-    analysis = analyze_data(filtered_df)
-    output_dir = Path(HydraConfig.get().runtime.output_dir)
-
-    if analysis.dose_histogram:
-        dose_hist_path = output_dir / "dose_histogram.png"
-        analysis.dose_histogram.savefig(dose_hist_path)
-        plt.close(analysis.dose_histogram)  # zwolnienie pamięci
-        logger.info(f"Saved dose histogram to {dose_hist_path}")
-
-    if analysis.cancer_cells_histogram:
-        cancer_hist_path = output_dir / "cancer_cells_histogram.png"
-        analysis.cancer_cells_histogram.savefig(cancer_hist_path)
-        plt.close(analysis.cancer_cells_histogram)  # zwolnienie pamięci
-        logger.info(f"Saved cancer cells histogram to {cancer_hist_path}")
-
-    if analysis.total_dose_histogram:
-        total_hist_path = output_dir / "total_dose.png"
-        analysis.total_dose_histogram.savefig(total_hist_path)
-        plt.close(analysis.total_dose_histogram)
-        logger.info(f"Saved total dose histogram to {total_hist_path}")
-
+    
+    logger.info("analyzing filtered dataset")
+    analysis_result = analyze_data(filtered_df)
 
     logger.info("Instantiating model from config")
     model : BaseModel = instantiate(cfg.model)
@@ -77,13 +50,14 @@ def main(cfg: DictConfig) -> None:
 
     output_dir = HydraConfig.get().runtime.output_dir
     report_path = Path(output_dir) / "run_report.html"
-    logger.info(f"Creating report at: {report_path}")
 
+    logger.info(f"Creating report at: {report_path}")
     generate_report(model_name = model.model_name,
                      opt_result=opt_result,
                      sim_val = simulated,
                      boundaries = cfg.optimizer.boundaries,
                      bounds_check = check_bounds(opt_result.min_protocol),
+                     analysis_result = analysis_result,
                      filename=str(report_path))
 
 

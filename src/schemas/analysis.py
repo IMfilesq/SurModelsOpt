@@ -45,3 +45,4 @@ class DatasetAnalysis:
     cancer_cells_histogram: Optional[matplotlib.figure.Figure] = None
     dose_histogram: Optional[matplotlib.figure.Figure] = None
     total_dose_histogram: Optional[matplotlib.figure.Figure] = None
+
