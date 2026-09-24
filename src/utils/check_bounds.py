@@ -14,7 +14,5 @@ def check_bounds(protocol : TupleProtocol) -> Boundaries:
                           max_single_dose = max(doses),
                           max_total_dose = sum(doses),
                           max_n_doses = len(protocol),
-                          max_total_time = times[-1],
-                          safety_eps=0,)
+                          max_total_time = times[-1],)
     return realized
-#da

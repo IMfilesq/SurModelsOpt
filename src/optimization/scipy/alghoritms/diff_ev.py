@@ -22,7 +22,7 @@ class DiffEv(ScipyBaseOptimizer):
         recombination : float = 0.8,
         maxiter : int = 15,
         seed : int = 42,
-        disp : bool = True,
+        disp : bool = False,
         workers : int = 1
     ):
         super().__init__(start=start,
@@ -42,7 +42,6 @@ class DiffEv(ScipyBaseOptimizer):
     def minimize(self) -> OptResult:
         x0 = self.get_x0()
         bounds = self.get_bounds()
-        constraints = self.get_constraints()
 
         start_time = time.perf_counter()
         de_result = sp.optimize.differential_evolution(

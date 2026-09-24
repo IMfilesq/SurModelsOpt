@@ -17,7 +17,7 @@ optimizer:
     max_total_dose : 10
     max_total_time : 72000 #5d
     max_n_doses : 5
-    safety_eps : 1e-3 #makes bounds stricter for the time of optimization
+safety_eps : 1e-3 #makes bounds stricter for the time of optimization
 simulation: 
   params_file : "/content/EMT6-Ro/data/default-parameters.json"
   tumor_file : "/content/EMT6-Ro/data/test_tumor.txt"

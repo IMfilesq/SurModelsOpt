@@ -20,7 +20,7 @@ class ScipyBaseOptimizer(BaseOptimizer, ABC):
         boundaries: Boundaries,
     ):
         self.model = model
-        self.boundaries = Converter.make_stricter(boundaries)
+        self.boundaries = boundaries
         self.start = start
 
     def unnormalize(self, opt_protocol: npt.NDArray[np.float64]) -> FlatProtocol:

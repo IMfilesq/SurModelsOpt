@@ -88,16 +88,15 @@ class Converter:
     
     @staticmethod
     @jaxtyped(typechecker=beartype)
-    def make_stricter(bounds : Boundaries):
-        tol = bounds.safety_eps
+    def make_stricter(bounds : Boundaries, safety_eps : float) -> Boundaries:
+        tol = safety_eps
         stricter = Boundaries(bounds.min_interval + tol,
                               bounds.max_interval - tol,
                               bounds.min_single_dose + tol,
                               bounds.max_single_dose - tol,
                               bounds.max_total_dose - tol,
                               bounds.max_total_time - tol,
-                              bounds.max_n_doses,
-                              tol,)
+                              bounds.max_n_doses)
         return stricter
 
     

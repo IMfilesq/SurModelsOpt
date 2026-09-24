@@ -14,6 +14,7 @@ from src.simulation.simulation import simulate
 from src.utils.check_bounds import check_bounds
 from src.utils.reporter import generate_report
 from src.data.analyzer import analyze_data
+from src.utils.converter import Converter
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
@@ -21,7 +22,6 @@ logger = logging.getLogger(__name__)
             version_base=None)
 
 def main(cfg: DictConfig) -> None:
-# loading data
     logger.info("loading raw data")
     df = load_raw_data(cfg.data.data_path)
 
@@ -35,9 +35,25 @@ def main(cfg: DictConfig) -> None:
     logger.info("Instantiating model from config")
     model : BaseModel = instantiate(cfg.model)
 
+    logger.info("running test prediction on martas best protocol")
+    from src.schemas.protocols import TupleProtocol
+    tpl : TupleProtocol = [
+        (0.0, 0.1993),
+        (15370.0, 2.2998),
+        (30964.0, 2.5),
+        (33408.0, 2.5),
+        (35869.0, 2.5)]
+    
+    print(model.predict(Converter.tuples_to_matrix(tpl)))
+
+    logger.info("Creating bounds stricter by safety_eps")
+    stricter_bounds = Converter.make_stricter(bounds = instantiate(cfg.optimizer.boundaries),
+                                              safety_eps = cfg.safety_eps)
 
     logger.info("Instantiating optimizer")
-    optimizer: BaseOptimizer = instantiate(cfg.optimizer, model=model)
+    optimizer: BaseOptimizer = instantiate(cfg.optimizer,
+                                           model = model,
+                                           boundaries = stricter_bounds)
 
     logger.info("Seeking for optimal protocol")
     opt_result = optimizer.minimize()
@@ -53,7 +69,7 @@ def main(cfg: DictConfig) -> None:
 
     logger.info(f"Creating report at: {report_path}")
     generate_report(model_name = model.model_name,
-                     opt_result=opt_result,
+                     opt_result= opt_result,
                      sim_val = simulated,
                      boundaries = cfg.optimizer.boundaries,
                      bounds_check = check_bounds(opt_result.min_protocol),

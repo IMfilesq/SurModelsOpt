@@ -10,4 +10,3 @@ class Boundaries:
     max_total_dose: float
     max_total_time: float
     max_n_doses: int
-    safety_eps: float
