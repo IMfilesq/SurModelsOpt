@@ -8,6 +8,10 @@ from src.schemas.protocols import TupleProtocol
 def simulate(protocol: TupleProtocol,
              params_file: str = "/content/EMT6-Ro/data/default-parameters.json",
              tumor_file: str = "/content/EMT6-Ro/data/test_tumor.txt") -> float:
+    """
+    Runs the emt6ro simulation when the package is available. Use of colab.ipynb file in the Google Colab envirnoment is advised.
+    """
+    
     try:
         import emt6ro.simulation as emt  # type: ignore
 
@@ -17,10 +21,8 @@ def simulate(protocol: TupleProtocol,
         params = emt.load_parameters(params_file)
         tumor_state = emt.load_state(tumor_file, params)
 
-        # Inicjalizacja dla 1 protokołu
         exp = emt.Experiment(params, [tumor_state], 50, 1)
 
-        # Formatowanie i opakowanie w dodatkową listę (lista protokołów)
         formatted_protocol = [(round(t), float(d)) for t, d in protocol]
         exp.add_irradiations([formatted_protocol]) 
 

@@ -12,6 +12,10 @@ from beartype import beartype
 
 
 class AW_Best(BaseModel):
+    """
+    Ania Warno's implementation of best model trained on raw.csv dataset. 
+
+    """
 
     def __init__(
         self,

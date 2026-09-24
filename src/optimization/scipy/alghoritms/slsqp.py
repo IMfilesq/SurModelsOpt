@@ -11,12 +11,16 @@ from src.utils.converter import Converter
 
 
 class SLSQP(ScipyBaseOptimizer):
+    """
+    SLSQP algorithm implementation for the sake of optimization
+    """
+
     def __init__(
         self,
         start: TupleProtocol,
         model: BaseModel,
         boundaries: Boundaries,
-        maxiter: int = 1000,
+        maxiter: int = 100,
         eps: float = 1e-5,
     ):
         super().__init__(start=start, model=model, boundaries=boundaries)

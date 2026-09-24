@@ -12,7 +12,7 @@ from src.utils.converter import Converter
 
 
 class BoundsChecker:
-    """Sprawdza, czy krok stochastyczny w BasinHopping nie wykracza poza dziedzinę [0, 1]."""
+    """Validates if the stochastic jump landed in the constrains"""
 
     def __init__(self, xmin: float = 0.0, xmax: float = 1.0):
         self.xmin = xmin
@@ -23,6 +23,9 @@ class BoundsChecker:
 
 
 class BasinHopping(ScipyBaseOptimizer):
+    """
+    BasinHopping alghortitm used for the sake of optimization,  with SLSQP opimizer as default.
+    """
     def __init__(
         self,
         start: TupleProtocol,

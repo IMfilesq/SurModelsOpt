@@ -1,15 +1,24 @@
-from typing import Optional
+
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from src.schemas.analysis import DatasetAnalysis
 from matplotlib.figure import Figure
+
+from src.schemas.analysis import DatasetAnalysis
 
 
 def _build_histogram_figure(
     series: pd.Series, title: str = "Histogram", num_bins: int = 10
-) -> Optional[Figure]:
-    """Helper function to generate a standalone Matplotlib Figure object."""
+) -> Figure | None:
+    """Generate a standalone Matplotlib Figure object for a data series histogram.
+
+    Args:
+        series: Pandas Series containing numerical data to plot.
+        title: Title of the generated histogram plot.
+        num_bins: Number of bins to use in the histogram.
+
+    Returns:
+        A Matplotlib Figure object, or None if the series is empty after dropping NaNs.
+    """
     clean_series = series.dropna()
     if clean_series.empty:
         return None
@@ -29,7 +38,22 @@ def analyze_data(
     df: pd.DataFrame,
     num_bins: int = 10,
 ) -> DatasetAnalysis:
-    """Calculates descriptive statistics and includes Matplotlib Figure objects for histograms."""
+    """Calculate descriptive statistics and generate histogram figures for the dataset.
+
+    Performs comprehensive analysis on doses, time intervals, series counts,
+    and cancer cell targets.
+
+    Args:
+        df: Input pandas DataFrame containing experimental runs. Expected columns:
+            'dose', 'series', 'time_gap', 'is_target', 'target'.
+        num_bins: Number of bins for the generated histogram figures.
+
+    Returns:
+        A DatasetAnalysis schema populated with statistical metrics and Matplotlib figures.
+
+    Raises:
+        ValueError: If the provided DataFrame is empty.
+    """
     if df.empty:
         raise ValueError("DataFrame is empty. Cannot perform analysis.")
 
@@ -92,7 +116,7 @@ def analyze_data(
     doses_count_per_series = df[df["dose"] > 0].groupby("series")["dose"].count()
 
     total_series = int(df["series"].nunique())
-    total_rows = int(len(df))
+    total_rows = len(df)
     mean_doses_series = (
         float(doses_count_per_series.mean())
         if not doses_count_per_series.empty

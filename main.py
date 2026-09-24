@@ -1,20 +1,28 @@
+import os
+import sys
+
+if "ipykernel" not in sys.modules and os.environ.get("MPLBACKEND") == "module://matplotlib_inline.backend_inline":
+    os.environ.pop("MPLBACKEND", None)
+
+
 import logging
 from pathlib import Path
-
+import pandas as pd
 import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
+from src.data.analyzer import analyze_data
 from src.data.filter import filter_data
-from src.data.loader import load_raw_data
 from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
 from src.simulation.simulation import simulate
 from src.utils.check_bounds import check_bounds
-from src.utils.reporter import generate_report
-from src.data.analyzer import analyze_data
 from src.utils.converter import Converter
+from src.utils.reporter import generate_report
+
+
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",
@@ -22,8 +30,11 @@ logger = logging.getLogger(__name__)
             version_base=None)
 
 def main(cfg: DictConfig) -> None:
-    logger.info("loading raw data")
-    df = load_raw_data(cfg.data.data_path)
+    """
+    Runs the whole analysis -> optimization -> simulation -> reporting pipeline.
+    """
+    logger.info("loading raw training data")
+    df = pd.read_csv(cfg.data.data_path)
 
     logger.info("filtering raw data with respect to constrains")
     filtered_df = filter_data(df=df,
@@ -34,17 +45,6 @@ def main(cfg: DictConfig) -> None:
 
     logger.info("Instantiating model from config")
     model : BaseModel = instantiate(cfg.model)
-
-    logger.info("running test prediction on martas best protocol")
-    from src.schemas.protocols import TupleProtocol
-    tpl : TupleProtocol = [
-        (0.0, 0.1993),
-        (15370.0, 2.2998),
-        (30964.0, 2.5),
-        (33408.0, 2.5),
-        (35869.0, 2.5)]
-    
-    print(model.predict(Converter.tuples_to_matrix(tpl)))
 
     logger.info("Creating bounds stricter by safety_eps")
     stricter_bounds = Converter.make_stricter(bounds = instantiate(cfg.optimizer.boundaries),
@@ -62,8 +62,8 @@ def main(cfg: DictConfig) -> None:
     simulated = simulate(protocol= opt_result.min_protocol,
                          params_file = cfg.simulation.params_file,
                          tumor_file = cfg.simulation.tumor_file)
-    print("simulated : ", simulated)
 
+    logger.info("Acessing hydra output path")
     output_dir = HydraConfig.get().runtime.output_dir
     report_path = Path(output_dir) / "run_report.html"
 

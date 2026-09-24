@@ -5,6 +5,9 @@ from src.schemas.protocols import TupleProtocol
 
 @dataclass
 class OptResult:
+    """
+    Stores results of the optimization.
+    """
     opt_name : str
     start : TupleProtocol
     min_protocol : TupleProtocol

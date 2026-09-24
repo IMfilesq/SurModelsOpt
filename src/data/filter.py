@@ -1,9 +1,5 @@
-import pandas as pd
-
-from src.schemas.boundaries import Boundaries
-
-
 from typing import cast
+
 import pandas as pd
 
 from src.schemas.boundaries import Boundaries
@@ -42,5 +38,4 @@ def filter_data(
 
     protocol_mask = valid_single_dose & valid_total_dose & valid_intervals
 
-    # cast na pd.DataFrame gwarantuje zgodność z typem zwracanym w definicji funkcji
     return cast(pd.DataFrame, filtered_df[protocol_mask])

@@ -10,7 +10,7 @@ class BaseOptimizer(ABC):
         Args:
         ---------------
             model (BaseModel): model to be optimized
-            initial_protocol (np.ndarray): initial treatment protocol in format [[time, dose, time_gap], ...] of length 20
+            initial_protocol (np.ndarray): initial treatment protocol in format [[time, dose, time_gap], ...] of fixed length 20
         Returns:
         ---------------
             float: minimum number of surviving cells after given treatment protocol"""

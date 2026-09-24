@@ -5,6 +5,9 @@ from src.schemas.protocols import TupleProtocol
 
 
 def check_bounds(protocol : TupleProtocol) -> Boundaries:
+    """
+    Calculates the actual value of each constraint for found protocol.
+    """
     doses = [dose for time, dose in protocol]
     times = [time for time, dose in protocol]
     intervals = list(np.diff(times, prepend = 0))

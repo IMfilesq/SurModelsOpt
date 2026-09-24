@@ -1,6 +1,5 @@
 import base64
 import io
-from typing import Optional
 
 import matplotlib.figure
 import pandas as pd
@@ -12,8 +11,8 @@ from src.schemas.optimization import OptResult
 from src.schemas.protocols import TupleProtocol
 
 
-def fig_to_base64(fig: Optional[matplotlib.figure.Figure]) -> Optional[str]:
-    """Konwertuje obiekt Matplotlib Figure na string data-URL w formacie Base64 PNG."""
+def fig_to_base64(fig: matplotlib.figure.Figure | None) -> str | None:
+    """Converts matplotlib to png for easy use in the html format"""
     if fig is None:
         return None
     buf = io.BytesIO()
@@ -214,6 +213,10 @@ def generate_report(
     analysis_result: DatasetAnalysis,
     filename: str = "opt_report.html",
 ) -> None:
+    """
+    Generates html reports about the whole optimization pipeline run
+    """
+    
     # 1. Convert optimal protocol to HTML DataFrame
     df_min = protocol_to_dataframe(opt_result.min_protocol)
     min_protocol_table_html = df_min.to_html(

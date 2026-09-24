@@ -7,6 +7,10 @@ from src.schemas.protocols import MatrixProtocol
 
 
 class BaseModel(ABC):
+    """
+    Blueprint for implementation of models used in the optimization pipeline.
+    """
+
     @property
     @abstractmethod
     def model_name(self) -> str:
@@ -19,4 +23,4 @@ class BaseModel(ABC):
         """Predicts number of surviving cells after given treatment protocol
         Args:
         ---------------
-            raw_protocol (np.array): treatment protocol in format [[time, dose, time_gap], ...] of length 20"""
+            raw_protocol (np.array): treatment protocol in format [[time, dose, time_gap], ...] of fixed length 20"""

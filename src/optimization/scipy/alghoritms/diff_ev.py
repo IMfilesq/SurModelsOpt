@@ -11,6 +11,9 @@ from src.utils.converter import Converter
 
 
 class DiffEv(ScipyBaseOptimizer):
+    """
+    Differential evoluton alghoritm for the sake of optimization.
+    """
     def __init__(
         self,
         start: TupleProtocol,
@@ -20,7 +23,7 @@ class DiffEv(ScipyBaseOptimizer):
         popsize : int = 20,
         mutation : tuple[float, float] = (0.5, 1.0),
         recombination : float = 0.8,
-        maxiter : int = 15,
+        maxiter : int = 100,
         seed : int = 42,
         disp : bool = False,
         workers : int = 1
@@ -29,7 +32,7 @@ class DiffEv(ScipyBaseOptimizer):
                          model=model,
                          boundaries=boundaries)
         
-        self.name = "Differential Evolution + SLSQP"
+        self.name = "Differential Evolution"
         self.strategy = strategy
         self.popsize = popsize
         self.mutation = mutation
@@ -44,7 +47,7 @@ class DiffEv(ScipyBaseOptimizer):
         bounds = self.get_bounds()
 
         start_time = time.perf_counter()
-        de_result = sp.optimize.differential_evolution(
+        result = sp.optimize.differential_evolution(
             self.fun,
             x0=x0,
             bounds=bounds,
@@ -59,25 +62,13 @@ class DiffEv(ScipyBaseOptimizer):
             workers = self.workers,
         ) 
 
-        print("debug: running slsqp polish with x0 as:")
-        print(de_result.x)
-        result = sp.optimize.minimize(
-            self.fun,
-            de_result.x,
-            method="SLSQP",
-            bounds=bounds,
-            constraints = self.get_constraints(),
-            options={"maxiter": 300, "eps": 1e-4, "disp": True},
-        )
-        print("slsqp min at:", result.x)
-
         end_time = time.perf_counter()
 
         return OptResult(
             min_protocol=Converter.flat_to_tuples(self.unnormalize(result.x)),
             min_val=float(result.fun),
             search_time=end_time - start_time,
-            n_iter=result.nit + de_result.nfev,
+            n_iter=result.nit,
             n_calls=result.nfev,
             opt_name=self.name,
             start=self.start,

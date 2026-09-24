@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+
 import matplotlib.figure
 
 
@@ -42,7 +42,7 @@ class DatasetAnalysis:
     median_cancer_cells: float
 
     # Histogram Figure Objects
-    cancer_cells_histogram: Optional[matplotlib.figure.Figure] = None
-    dose_histogram: Optional[matplotlib.figure.Figure] = None
-    total_dose_histogram: Optional[matplotlib.figure.Figure] = None
+    cancer_cells_histogram: matplotlib.figure.Figure | None = None
+    dose_histogram: matplotlib.figure.Figure | None = None
+    total_dose_histogram: matplotlib.figure.Figure | None = None
 

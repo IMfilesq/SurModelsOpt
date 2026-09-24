@@ -1,4 +1,3 @@
-from networkx import jaccard_coefficient
 import numpy as np
 from beartype import beartype
 from jaxtyping import jaxtyped
@@ -9,7 +8,7 @@ from src.schemas.protocols import FlatProtocol, MatrixProtocol, TupleProtocol
 
 class Converter:
     """
-    Contains methods used for conversion between protocol formats
+    Contains methods used for conversion between protocol and constraint formats
     """
 
     @staticmethod
@@ -31,14 +30,6 @@ class Converter:
 
         return matrix
 
-    # @staticmethod
-    # @jaxtyped(typechecker=beartype)
-    # def matrix_to_flat(matrix: MatrixProtocol) -> FlatProtocol:
-    #     doses = matrix[:, 0]
-    #     intervals = matrix[:, 2]
-    #     return np.concatenate([intervals, doses])
-
-
     @staticmethod
     @jaxtyped(typechecker=beartype)
     def flat_to_tuples(flat: FlatProtocol) -> TupleProtocol:
@@ -50,7 +41,7 @@ class Converter:
 
     @staticmethod
     @jaxtyped(typechecker=beartype)
-    def tuples_to_flat(tuples: TupleProtocol, max_doses: int = 20) -> FlatProtocol:
+    def tuples_to_flat(tuples: TupleProtocol, max_doses: int) -> FlatProtocol:
         intervals = np.zeros(max_doses, dtype=np.float64)
         doses = np.zeros(max_doses, dtype=np.float64)
 
@@ -64,8 +55,6 @@ class Converter:
 
         return np.concatenate([intervals, doses])
 
-    # --- MATRIX <-> TUPLES ---
-
     @staticmethod
     @jaxtyped(typechecker=beartype)
     def matrix_to_tuples(matrix: MatrixProtocol) -> TupleProtocol:
@@ -76,14 +65,9 @@ class Converter:
 
     @staticmethod
     @jaxtyped(typechecker=beartype)
-    def tuples_to_matrix(tuples: TupleProtocol) -> MatrixProtocol:
-        flat = Converter.tuples_to_flat(tuples)
+    def tuples_to_matrix(tuples: TupleProtocol, max_doses : int) -> MatrixProtocol:
+        flat = Converter.tuples_to_flat(tuples, max_doses)
         return Converter.flat_to_matrix(flat)
-
-    @staticmethod
-    @jaxtyped(typechecker=beartype)
-    def round_to_valid(protocol : TupleProtocol):
-        rounded = [(int(time), dose) for time, dose in protocol]
 
     
     @staticmethod
