@@ -61,7 +61,8 @@ def main(cfg: DictConfig) -> None:
     logger.info("Running cancer growth simulation for found protocol")
     simulated = simulate(protocol= opt_result.min_protocol,
                          params_file = cfg.simulation.params_file,
-                         tumor_file = cfg.simulation.tumor_file)
+                         tumor_file = cfg.simulation.tumor_file,
+                         n_sim = cfg.simulation.n_sim)
 
     logger.info("Acessing hydra output path")
     output_dir = HydraConfig.get().runtime.output_dir

@@ -21,3 +21,4 @@ safety_eps : 1e-3 #makes bounds stricter for the time of optimization
 simulation: 
   params_file : "/content/EMT6-Ro/data/default-parameters.json"
   tumor_file : "/content/EMT6-Ro/data/test_tumor.txt"
+  n_sim : 50

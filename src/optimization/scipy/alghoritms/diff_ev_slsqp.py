@@ -78,8 +78,8 @@ class DiffEvSLSQP(ScipyBaseOptimizer):
             min_protocol=Converter.flat_to_tuples(self.unnormalize(result.x)),
             min_val=float(result.fun),
             search_time=end_time - start_time,
-            n_iter=result.nit + de_result.nfev,
-            n_calls=result.nfev,
+            n_iter=result.nit + de_result.nit,
+            n_calls=result.nfev + de_result.nfev,
             opt_name=self.name,
             start=self.start,
         )
