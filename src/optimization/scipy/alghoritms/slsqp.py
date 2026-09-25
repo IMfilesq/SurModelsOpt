@@ -24,9 +24,19 @@ class SLSQP(ScipyBaseOptimizer):
         eps: float = 1e-5,
     ):
         super().__init__(start=start, model=model, boundaries=boundaries)
-        self.name = "SLSQP"
         self.maxiter = maxiter
         self.eps = eps
+
+    @property
+    def name(self) -> str:
+        return "SLSQP"
+
+    def get_constraints(self) -> list[dict]:
+        """SLSQP constrains format"""
+        return [
+            {"type": "ineq", "fun": self.total_time_fun},
+            {"type": "ineq", "fun": self.total_dose_fun},
+        ]
 
     def minimize(self) -> OptResult:
         x0 = self.get_x0()
@@ -53,3 +63,5 @@ class SLSQP(ScipyBaseOptimizer):
             opt_name=self.name,
             start=self.start,
         )
+
+    

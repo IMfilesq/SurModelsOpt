@@ -39,7 +39,6 @@ class BasinHopping(ScipyBaseOptimizer):
         tol: float = 1e-3,  # Tolerancja "z grubsza" dla ograniczeń
     ):
         super().__init__(start=start, model=model, boundaries=boundaries)
-        self.name = f"BasinHopping_{local_method}"
         self.niter = niter
         self.T = T
         self.stepsize = stepsize
@@ -50,13 +49,23 @@ class BasinHopping(ScipyBaseOptimizer):
         self._best_x = None
         self._best_f = float("inf")
 
+    @property
+    def name(self) -> str:
+        return f"BasinHopping_{self.local_method}"
+
+    def get_constraints(self) -> list[dict]:
+        """SLSQP constrains format"""
+        return [
+            {"type": "ineq", "fun": self.total_time_fun},
+            {"type": "ineq", "fun": self.total_dose_fun},
+        ]
+
     def _is_feasible(self, x: np.ndarray) -> bool:
         """Sprawdza, czy punkt x spełnia granice oraz ograniczenia z tolerancją `self.tol`."""
-        # 1. Sprawdzenie granic [0, 1] z tolerancją
+
         if not (np.all(x >= -self.tol) and np.all(x <= 1.0 + self.tol)):
             return False
 
-        # 2. Sprawdzenie ograniczeń z get_constraints()
         for constraint in self.get_constraints():
             val = constraint["fun"](x)
             if constraint["type"] == "ineq" and val < -self.tol or constraint["type"] == "eq" and abs(val) > self.tol:
@@ -66,7 +75,6 @@ class BasinHopping(ScipyBaseOptimizer):
 
     def _tracked_fun(self, x: np.ndarray) -> float:
         val = self.fun(x)
-        # Zapisujemy wynik TYLKO wtedy, gdy jest niższy ORAZ spełnia ograniczenia
         if val < self._best_f and self._is_feasible(x):
             self._best_f = val
             self._best_x = x.copy()
@@ -116,60 +124,3 @@ class BasinHopping(ScipyBaseOptimizer):
             opt_name=self.name,
             start=self.start,
         )
-
-# class BasinHopping(ScipyBaseOptimizer):
-#     def __init__(
-#         self,
-#         start: TupleProtocol,
-#         model: BaseModel,
-#         boundaries: Boundaries,
-#         niter: int = 15,
-#         T: float = 1.0,
-#         stepsize: float = 0.2,
-#         local_method: str = "SLSQP",
-#         use_bounds_checker: bool = True,
-#     ):
-#         super().__init__(start=start, model=model, boundaries=boundaries)
-#         self.name = "BasinHopping" + local_method
-#         self.niter = niter
-#         self.T = T
-#         self.stepsize = stepsize
-#         self.local_method = local_method
-#         self.use_bounds_checker = use_bounds_checker
-
-#     def minimize(self) -> OptResult:
-#         x0 = self.get_x0()
-#         bounds = self.get_bounds()
-#         constraints = self.get_constraints()
-
-#         minimizer_kwargs = {
-#             "method": self.local_method,
-#             "bounds": bounds,
-#             "constraints": constraints,
-#             "options": {"eps": 1e-5},
-#         }
-
-#         accept_test = BoundsChecker(xmin=0.0, xmax=1.0) if self.use_bounds_checker else None
-
-#         start_time = time.perf_counter()
-#         result = sp.optimize.basinhopping(
-#             self.fun,
-#             x0=x0,
-#             niter=self.niter,
-#             T=self.T,
-#             stepsize=self.stepsize,
-#             minimizer_kwargs=minimizer_kwargs,
-#             accept_test=accept_test,
-#             disp = True,
-#         )
-#         end_time = time.perf_counter()
-
-#         return OptResult(
-#             min_protocol=Converter.flat_to_tuples(self.unnormalize(result.x)),
-#             min_val=float(result.fun),
-#             search_time=end_time - start_time,
-#             n_iter=result.nit,
-#             n_calls=result.nfev,
-#             opt_name=self.name,
-#             start=self.start,
-#         )

@@ -1,6 +1,7 @@
 import time
 
 import scipy as sp
+import numpy as np
 
 from src.models.base_model import BaseModel
 from src.optimization.scipy.sp_base_optimizer import ScipyBaseOptimizer
@@ -8,6 +9,7 @@ from src.schemas.boundaries import Boundaries
 from src.schemas.optimization import OptResult
 from src.schemas.protocols import TupleProtocol
 from src.utils.converter import Converter
+from scipy.optimize import NonlinearConstraint
 
 
 class DiffEvSLSQP(ScipyBaseOptimizer):
@@ -32,7 +34,6 @@ class DiffEvSLSQP(ScipyBaseOptimizer):
                          model=model,
                          boundaries=boundaries)
         
-        self.name = "Differential Evolution + SLSQP"
         self.strategy = strategy
         self.popsize = popsize
         self.mutation = mutation
@@ -41,6 +42,24 @@ class DiffEvSLSQP(ScipyBaseOptimizer):
         self.seed = seed
         self.disp = disp
         self.workers = workers
+
+    @property
+    def name(self) -> str:
+        return "Differential Evolution + SLSQP"
+
+    def get_constraints(self) -> list[dict]:
+        """SLSQP constrains format"""
+        return [
+            {"type": "ineq", "fun": self.total_time_fun},
+            {"type": "ineq", "fun": self.total_dose_fun},
+        ]
+
+    def get_de_constraints(self) -> list[NonlinearConstraint]:
+        """Differential evolution constrains"""
+        return [
+            NonlinearConstraint(self.total_time_fun, 0.0, np.inf),
+            NonlinearConstraint(self.total_dose_fun, 0.0, np.inf),
+        ]
 
     def minimize(self) -> OptResult:
         x0 = self.get_x0()

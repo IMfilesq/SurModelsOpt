@@ -1,0 +1,2 @@
+- optimizer._target_=src.optimization.scipy.alghoritms.slsqp.SLSQP
+- safety_eps=1e-2

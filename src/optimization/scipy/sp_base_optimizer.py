@@ -2,7 +2,6 @@ from abc import ABC
 
 import numpy as np
 from numpy import typing as npt
-from scipy.optimize import NonlinearConstraint
 
 from src.models.base_model import BaseModel
 from src.optimization.base_optimizer import BaseOptimizer
@@ -79,19 +78,6 @@ class ScipyBaseOptimizer(BaseOptimizer, ABC):
     def get_bounds(self) -> list[tuple[float, float]]:
         return [(0.0, 1.0) for _ in range(self.boundaries.max_n_doses * 2)]
 
-    def get_de_constraints(self) -> list[NonlinearConstraint]:
-        """Differential evolution constrains"""
-        return [
-            NonlinearConstraint(self.total_time_fun, 0.0, np.inf),
-            NonlinearConstraint(self.total_dose_fun, 0.0, np.inf),
-        ]
-
-    def get_constraints(self) -> list[dict]:
-        """SLSQP constrains format"""
-        return [
-            {"type": "ineq", "fun": self.total_time_fun},
-            {"type": "ineq", "fun": self.total_dose_fun},
-        ]
 
     def get_x0(self) -> npt.NDArray[np.float64]:
         return self.normalize(
