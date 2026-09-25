@@ -1,14 +1,16 @@
 import os
 import sys
 
+#mandatory for proper collab run
 if "ipykernel" not in sys.modules and os.environ.get("MPLBACKEND") == "module://matplotlib_inline.backend_inline":
     os.environ.pop("MPLBACKEND", None)
 
 
 import logging
 from pathlib import Path
-import pandas as pd
+
 import hydra
+import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -21,8 +23,6 @@ from src.simulation.simulation import simulate
 from src.utils.check_bounds import check_bounds
 from src.utils.converter import Converter
 from src.utils.reporter import generate_report
-
-
 
 logger = logging.getLogger(__name__)
 @hydra.main(config_path="config",

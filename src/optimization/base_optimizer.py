@@ -8,7 +8,6 @@ class BaseOptimizer(ABC):
     @abstractmethod
     def name(self) -> str:
         """Name of the optimizer."""
-        pass
 
     @abstractmethod
     def minimize(self) -> OptResult:
