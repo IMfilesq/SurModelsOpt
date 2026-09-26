@@ -33,6 +33,8 @@ def main(cfg: DictConfig) -> None:
     """
     Runs the whole analysis -> optimization -> simulation -> reporting pipeline.
     """
+    assert len(cfg.optimizer.start) == cfg.optimizer.boundaries.max_n_doses, "(config) start and max_n_doses must have equal length"
+
     logger.info("loading raw training data")
     df = pd.read_csv(cfg.data.data_path)
 
